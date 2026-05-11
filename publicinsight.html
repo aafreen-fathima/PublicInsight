@@ -1,0 +1,777 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>PublicInsight — Product Intelligence</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=Syne:wght@400;500;700&display=swap" rel="stylesheet" />
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #0c0c0e;
+  --bg2: #131316;
+  --bg3: #1a1a1f;
+  --bg4: #222228;
+  --border: rgba(255,255,255,0.07);
+  --border2: rgba(255,255,255,0.12);
+  --text: #f0efe8;
+  --text2: #9998a0;
+  --text3: #5a5960;
+  --teal: #1d9e75;
+  --teal-dim: #0f4a37;
+  --teal-light: #5dcaa5;
+  --coral: #d85a30;
+  --coral-dim: #5a2410;
+  --purple: #7f77dd;
+  --purple-dim: #2e2960;
+  --amber: #ef9f27;
+  --amber-dim: #5a3b0a;
+  --blue: #378add;
+  --blue-dim: #0f2e50;
+  --red: #e24b4a;
+}
+
+html, body { height: 100%; background: var(--bg); color: var(--text); font-family: 'Syne', sans-serif; overflow: hidden; }
+
+/* Layout */
+.app { display: grid; grid-template-columns: 240px 1fr; grid-template-rows: 100vh; height: 100vh; }
+
+/* Sidebar */
+.sidebar {
+  background: var(--bg2);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.sidebar-logo {
+  padding: 24px 20px 20px;
+  border-bottom: 1px solid var(--border);
+}
+.logo-mark {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.logo-icon {
+  width: 28px; height: 28px;
+  background: var(--teal);
+  border-radius: 6px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px; color: #fff; font-weight: 700;
+  font-family: 'DM Serif Display', serif;
+  font-style: italic;
+}
+.logo-text { font-size: 17px; font-weight: 700; letter-spacing: -0.02em; }
+.logo-sub { font-size: 10px; color: var(--text3); letter-spacing: 0.1em; text-transform: uppercase; margin-top: 2px; font-family: 'DM Mono', monospace; }
+
+.sidebar-section { padding: 16px 12px 8px; }
+.sidebar-section-label { font-size: 10px; color: var(--text3); letter-spacing: 0.12em; text-transform: uppercase; font-family: 'DM Mono', monospace; padding: 0 8px; margin-bottom: 6px; }
+
+.nav-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 8px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  color: var(--text2);
+  transition: background 0.15s, color 0.15s;
+  margin-bottom: 1px;
+}
+.nav-item:hover { background: var(--bg3); color: var(--text); }
+.nav-item.active { background: var(--bg4); color: var(--text); }
+.nav-item svg { width: 15px; height: 15px; flex-shrink: 0; opacity: 0.7; }
+.nav-item.active svg { opacity: 1; }
+
+.sidebar-history { flex: 1; overflow-y: auto; padding: 8px 12px; }
+.sidebar-history::-webkit-scrollbar { width: 3px; }
+.sidebar-history::-webkit-scrollbar-track { background: transparent; }
+.sidebar-history::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+
+.history-item {
+  padding: 8px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.15s;
+  margin-bottom: 2px;
+}
+.history-item:hover { background: var(--bg3); }
+.history-item .h-name { font-size: 13px; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.history-item .h-meta { font-size: 11px; color: var(--text3); margin-top: 2px; font-family: 'DM Mono', monospace; }
+
+.sidebar-bottom {
+  padding: 16px;
+  border-top: 1px solid var(--border);
+}
+.new-btn {
+  width: 100%;
+  background: var(--teal);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 10px;
+  font-size: 13px;
+  font-weight: 600;
+  font-family: 'Syne', sans-serif;
+  cursor: pointer;
+  transition: background 0.15s, transform 0.1s;
+  letter-spacing: 0.02em;
+}
+.new-btn:hover { background: #15805e; }
+.new-btn:active { transform: scale(0.98); }
+
+/* Main */
+.main { display: flex; flex-direction: column; overflow: hidden; }
+
+.topbar {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 28px;
+  height: 56px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.topbar-title { font-size: 14px; font-weight: 600; color: var(--text2); }
+.topbar-actions { display: flex; gap: 8px; }
+.icon-btn {
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  width: 32px; height: 32px;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  color: var(--text2);
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+}
+.icon-btn:hover { background: var(--bg3); border-color: var(--border2); color: var(--text); }
+.icon-btn svg { width: 15px; height: 15px; }
+
+.content { flex: 1; overflow-y: auto; padding: 32px 28px; }
+.content::-webkit-scrollbar { width: 4px; }
+.content::-webkit-scrollbar-track { background: transparent; }
+.content::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+
+/* Home / empty state */
+.home-state { max-width: 600px; margin: 0 auto; padding-top: 40px; }
+.home-headline {
+  font-family: 'DM Serif Display', serif;
+  font-size: 42px;
+  line-height: 1.1;
+  margin-bottom: 12px;
+  color: var(--text);
+}
+.home-headline em { color: var(--teal-light); font-style: italic; }
+.home-sub { font-size: 15px; color: var(--text2); line-height: 1.6; margin-bottom: 36px; }
+
+.search-box {
+  background: var(--bg2);
+  border: 1px solid var(--border2);
+  border-radius: 12px;
+  padding: 16px 20px;
+  margin-bottom: 20px;
+  transition: border-color 0.15s;
+}
+.search-box:focus-within { border-color: var(--teal); }
+.search-box label { display: block; font-size: 11px; color: var(--text3); letter-spacing: 0.1em; text-transform: uppercase; font-family: 'DM Mono', monospace; margin-bottom: 10px; }
+.search-row { display: flex; gap: 10px; }
+.search-input {
+  flex: 1;
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-size: 15px;
+  color: var(--text);
+  font-family: 'Syne', sans-serif;
+  outline: none;
+  transition: border-color 0.15s;
+}
+.search-input::placeholder { color: var(--text3); }
+.search-input:focus { border-color: var(--border2); }
+.analyze-btn {
+  background: var(--teal);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 20px;
+  font-size: 14px;
+  font-weight: 600;
+  font-family: 'Syne', sans-serif;
+  cursor: pointer;
+  transition: background 0.15s, transform 0.1s;
+  white-space: nowrap;
+  display: flex; align-items: center; gap: 8px;
+}
+.analyze-btn:hover { background: #15805e; }
+.analyze-btn:active { transform: scale(0.98); }
+.analyze-btn:disabled { background: var(--bg4); color: var(--text3); cursor: not-allowed; transform: none; }
+
+.source-pills { display: flex; gap: 8px; flex-wrap: wrap; }
+.source-pill {
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 6px 14px;
+  font-size: 12px;
+  color: var(--text2);
+  cursor: pointer;
+  transition: all 0.15s;
+  font-family: 'DM Mono', monospace;
+}
+.source-pill:hover { border-color: var(--border2); color: var(--text); }
+.source-pill.active { background: var(--teal-dim); border-color: var(--teal); color: var(--teal-light); }
+
+.suggestions { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 28px; }
+.suggestion-card {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 14px 16px;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+}
+.suggestion-card:hover { border-color: var(--border2); background: var(--bg3); }
+.suggestion-card .s-label { font-size: 11px; color: var(--text3); font-family: 'DM Mono', monospace; margin-bottom: 4px; }
+.suggestion-card .s-name { font-size: 14px; font-weight: 600; color: var(--text); }
+.suggestion-card .s-src { font-size: 11px; color: var(--text3); margin-top: 2px; }
+
+/* Loading state */
+.loading-state { max-width: 600px; margin: 0 auto; padding-top: 60px; text-align: center; }
+.loading-ring { width: 48px; height: 48px; border: 2px solid var(--border); border-top-color: var(--teal); border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 24px; }
+.loading-title { font-size: 18px; font-weight: 600; margin-bottom: 8px; }
+.loading-sub { font-size: 14px; color: var(--text2); font-family: 'DM Mono', monospace; }
+.loading-steps { margin-top: 28px; display: flex; flex-direction: column; gap: 10px; max-width: 320px; margin-left: auto; margin-right: auto; }
+.loading-step { display: flex; align-items: center; gap: 10px; font-size: 13px; color: var(--text3); text-align: left; }
+.step-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--border2); flex-shrink: 0; transition: background 0.4s; }
+.step-dot.done { background: var(--teal); }
+.step-dot.active { background: var(--teal-light); animation: pulse 1s ease-in-out infinite; }
+@keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.4; } }
+
+/* Results */
+.results-page { max-width: 700px; }
+.results-header { margin-bottom: 28px; }
+.results-product { font-family: 'DM Serif Display', serif; font-size: 32px; color: var(--text); margin-bottom: 4px; }
+.results-meta { display: flex; gap: 12px; align-items: center; }
+.results-badge {
+  font-size: 11px;
+  font-family: 'DM Mono', monospace;
+  padding: 3px 10px;
+  border-radius: 20px;
+  background: var(--teal-dim);
+  color: var(--teal-light);
+  border: 1px solid var(--teal);
+}
+.results-time { font-size: 12px; color: var(--text3); font-family: 'DM Mono', monospace; }
+
+.section { margin-bottom: 32px; }
+.section-heading {
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text3);
+  font-family: 'DM Mono', monospace;
+  margin-bottom: 14px;
+  display: flex; align-items: center; gap: 8px;
+}
+.section-heading::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+.theme-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+.theme-card {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 14px;
+  transition: border-color 0.15s;
+}
+.theme-card:hover { border-color: var(--border2); }
+.theme-label { font-size: 12px; font-weight: 600; margin-bottom: 8px; }
+.theme-bar-bg { height: 3px; background: var(--bg4); border-radius: 2px; margin-bottom: 6px; overflow: hidden; }
+.theme-bar { height: 100%; border-radius: 2px; }
+.theme-count { font-size: 11px; color: var(--text3); font-family: 'DM Mono', monospace; }
+
+.signal-list { display: flex; flex-direction: column; gap: 8px; }
+.signal-row {
+  display: flex; gap: 12px; align-items: flex-start;
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 14px 16px;
+  transition: border-color 0.15s;
+}
+.signal-row:hover { border-color: var(--border2); }
+.signal-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; margin-top: 5px; }
+.signal-text { font-size: 13px; color: var(--text); line-height: 1.6; flex: 1; }
+.signal-tag {
+  font-size: 10px;
+  font-family: 'DM Mono', monospace;
+  padding: 2px 8px;
+  border-radius: 20px;
+  flex-shrink: 0;
+  margin-top: 2px;
+  align-self: flex-start;
+}
+.tag-opp { background: var(--teal-dim); color: var(--teal-light); border: 1px solid var(--teal); }
+.tag-risk { background: var(--coral-dim); color: #f0997b; border: 1px solid var(--coral); }
+.tag-gap { background: var(--purple-dim); color: #afa9ec; border: 1px solid var(--purple); }
+
+.idea-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+.idea-card {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 18px;
+  transition: border-color 0.15s, background 0.15s;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+}
+.idea-card::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0; height: 2px;
+  background: var(--teal);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.2s;
+}
+.idea-card:hover { border-color: var(--teal-dim); background: var(--bg3); }
+.idea-card:hover::before { transform: scaleX(1); }
+.idea-num { font-size: 11px; color: var(--text3); font-family: 'DM Mono', monospace; margin-bottom: 8px; }
+.idea-title { font-size: 15px; font-weight: 600; margin-bottom: 6px; }
+.idea-desc { font-size: 12px; color: var(--text2); line-height: 1.6; }
+.idea-cta { margin-top: 12px; font-size: 11px; color: var(--teal-light); font-family: 'DM Mono', monospace; opacity: 0; transition: opacity 0.15s; }
+.idea-card:hover .idea-cta { opacity: 1; }
+
+.export-row { display: flex; gap: 10px; margin-top: 32px; padding-top: 24px; border-top: 1px solid var(--border); }
+.export-btn {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 9px 16px;
+  font-size: 13px;
+  color: var(--text2);
+  cursor: pointer;
+  font-family: 'Syne', sans-serif;
+  transition: all 0.15s;
+  display: flex; align-items: center; gap: 7px;
+}
+.export-btn:hover { background: var(--bg3); border-color: var(--border2); color: var(--text); }
+.export-btn svg { width: 14px; height: 14px; }
+
+@keyframes spin { to { transform: rotate(360deg); } }
+@keyframes fadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+.fade-up { animation: fadeUp 0.35s ease forwards; }
+
+/* Notification toast */
+.toast {
+  position: fixed; bottom: 24px; right: 24px;
+  background: var(--bg3);
+  border: 1px solid var(--border2);
+  border-radius: 10px;
+  padding: 12px 18px;
+  font-size: 13px;
+  color: var(--text);
+  display: flex; align-items: center; gap: 10px;
+  transform: translateY(60px); opacity: 0;
+  transition: all 0.25s;
+  z-index: 100;
+  pointer-events: none;
+}
+.toast.show { transform: translateY(0); opacity: 1; }
+.toast-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--teal); flex-shrink: 0; }
+</style>
+</head>
+<body>
+
+<div class="app">
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-mark">
+        <div class="logo-icon">P</div>
+        <div>
+          <div class="logo-text">PublicInsight</div>
+          <div class="logo-sub">Product Intelligence</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-section-label">Menu</div>
+      <div class="nav-item active" onclick="showHome()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12L12 3l9 9"/><path d="M9 21V12h6v9"/></svg>
+        New Analysis
+      </div>
+      <div class="nav-item" onclick="showToast('Settings coming soon')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 010 14.14M4.93 4.93a10 10 0 000 14.14"/></svg>
+        Settings
+      </div>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-section-label">Recent</div>
+    </div>
+    <div class="sidebar-history" id="history-list">
+      <div style="font-size:12px;color:var(--text3);padding:8px 10px;font-family:'DM Mono',monospace;">No analyses yet</div>
+    </div>
+
+    <div class="sidebar-bottom">
+      <button class="new-btn" onclick="showHome()">+ New Analysis</button>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <main class="main">
+    <div class="topbar">
+      <div class="topbar-title" id="topbar-title">PublicInsight — Product Intelligence</div>
+      <div class="topbar-actions">
+        <button class="icon-btn" title="Export" id="export-icon-btn" style="display:none" onclick="exportResults()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        </button>
+        <button class="icon-btn" title="Share" onclick="showToast('Link copied to clipboard')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <div class="content" id="main-content">
+      <!-- Home state rendered by JS -->
+    </div>
+  </main>
+</div>
+
+<div class="toast" id="toast">
+  <div class="toast-dot"></div>
+  <span id="toast-text"></span>
+</div>
+
+<script>
+let activeSource = 'reddit';
+let history = [];
+let currentResults = null;
+let anthropicApiKey = null;
+
+const sourceLabels = {
+  reddit: 'Reddit',
+  glassdoor: 'Glassdoor',
+  appstore: 'App Store',
+  producthunt: 'Product Hunt'
+};
+
+const barColors = {
+  teal: '#1D9E75', coral: '#D85A30', purple: '#7F77DD', blue: '#378ADD', amber: '#EF9F27'
+};
+
+// Initialize API key from sessionStorage or environment
+function initApiKey() {
+  anthropicApiKey = sessionStorage.getItem('ANTHROPIC_API_KEY');
+  if (!anthropicApiKey) {
+    const envKey = window.ANTHROPIC_API_KEY;
+    if (envKey) {
+      anthropicApiKey = envKey;
+      sessionStorage.setItem('ANTHROPIC_API_KEY', envKey);
+    }
+  }
+}
+
+function showHome() {
+  document.getElementById('export-icon-btn').style.display = 'none';
+  document.getElementById('topbar-title').textContent = 'PublicInsight — Product Intelligence';
+  document.querySelectorAll('.nav-item').forEach((el, i) => el.classList.toggle('active', i === 0));
+  document.getElementById('main-content').innerHTML = `
+    <div class="home-state fade-up">
+      <h1 class="home-headline">PublicInsight<br><span style='font-size:28px;font-family:Syne,sans-serif;font-weight:400;color:var(--text2)'>Turn public noise<br>into <em>product signal.</em></h1>
+      <p class="home-sub">Scan Reddit threads, Glassdoor reviews, App Store complaints and Product Hunt comments. Get clustered themes, classified signals, and actionable feature ideas — instantly.</p>
+
+      <div class="search-box">
+        <label>Product or category</label>
+        <div class="search-row">
+          <input class="search-input" id="search-input" placeholder="e.g. Notion, Figma, Linear, Slack…" onkeydown="if(event.key==='Enter')runAnalysis()" autofocus />
+          <button class="analyze-btn" id="analyze-btn" onclick="runAnalysis()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            Analyze
+          </button>
+        </div>
+        <div style="margin-top:14px;">
+          <div style="font-size:11px;color:var(--text3);font-family:'DM Mono',monospace;margin-bottom:8px;">Data source</div>
+          <div class="source-pills">
+            <span class="source-pill active" data-src="reddit" onclick="selectSource(this)">Reddit</span>
+            <span class="source-pill" data-src="glassdoor" onclick="selectSource(this)">Glassdoor</span>
+            <span class="source-pill" data-src="appstore" onclick="selectSource(this)">App Store</span>
+            <span class="source-pill" data-src="producthunt" onclick="selectSource(this)">Product Hunt</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="suggestions">
+        <div class="suggestion-card" onclick="quickRun('Notion','reddit')">
+          <div class="s-label">Try an example</div>
+          <div class="s-name">Notion</div>
+          <div class="s-src">Reddit threads</div>
+        </div>
+        <div class="suggestion-card" onclick="quickRun('Figma','appstore')">
+          <div class="s-label">Try an example</div>
+          <div class="s-name">Figma</div>
+          <div class="s-src">App Store reviews</div>
+        </div>
+        <div class="suggestion-card" onclick="quickRun('Linear','producthunt')">
+          <div class="s-label">Try an example</div>
+          <div class="s-name">Linear</div>
+          <div class="s-src">Product Hunt</div>
+        </div>
+      </div>
+    </div>`;
+}
+
+function selectSource(el) {
+  document.querySelectorAll('.source-pill').forEach(p => p.classList.remove('active'));
+  el.classList.add('active');
+  activeSource = el.dataset.src;
+}
+
+function quickRun(product, source) {
+  activeSource = source;
+  showHome();
+  setTimeout(() => {
+    document.getElementById('search-input').value = product;
+    document.querySelectorAll('.source-pill').forEach(p => {
+      p.classList.toggle('active', p.dataset.src === source);
+    });
+    runAnalysis();
+  }, 50);
+}
+
+async function runAnalysis() {
+  const input = document.getElementById('search-input');
+  if (!input) return;
+  const product = input.value.trim();
+  if (!product) { input.focus(); return; }
+
+  // Ensure API key is set
+  initApiKey();
+  if (!anthropicApiKey) {
+    const key = prompt('Enter your Anthropic API key (sk-ant-...):');
+    if (!key) {
+      showToast('API key required to run analysis');
+      return;
+    }
+    anthropicApiKey = key;
+    sessionStorage.setItem('ANTHROPIC_API_KEY', key);
+  }
+
+  showLoading(product);
+
+  const system = `You are a senior product analyst. Given a product name and data source, simulate a realistic analysis as if you scraped and synthesized hundreds of posts/reviews from that source. Return ONLY valid JSON with no markdown, no preamble, no explanation.
+
+JSON schema:
+{
+  "themes": [{"name":"string (3-5 words)","count":number,"color":"teal|coral|purple|blue|amber"}],
+  "signals": [{"text":"string (one sharp sentence)","type":"opportunity|risk|gap"}],
+  "ideas": [{"title":"string","desc":"string (1-2 sentences, concrete and specific)"}]
+}
+
+Rules: themes=4 items, signals=5 items, ideas=4 items. Be specific to the product. Vary counts 15-180. Make ideas actionable, not vague.`;
+
+  const userMsg = `Product: "${product}". Source: ${sourceLabels[activeSource]} ${activeSource === 'appstore' ? '(focus on 1-3 star reviews)' : activeSource === 'glassdoor' ? '(user/employee reviews)' : activeSource === 'producthunt' ? '(launch day comments)' : '(community discussion threads)'}`;
+
+  // Animate loading steps
+  const steps = ['Scanning data source…', 'Clustering themes…', 'Classifying signals…', 'Generating ideas…'];
+  let stepIdx = 0;
+  const stepInterval = setInterval(() => {
+    stepIdx++;
+    document.querySelectorAll('.step-dot').forEach((dot, i) => {
+      dot.classList.toggle('done', i < stepIdx);
+      dot.classList.toggle('active', i === stepIdx);
+    });
+    if (stepIdx >= steps.length) clearInterval(stepInterval);
+  }, 700);
+
+  try {
+    const useProxy = window.location.protocol.startsWith('http');
+    const endpoint = useProxy ? '/api/anthropic' : 'https://api.anthropic.com/v1/messages';
+    const headers = {
+      'Content-Type': 'application/json'
+    };
+    if (!useProxy) {
+      headers['x-api-key'] = anthropicApiKey;
+      headers['anthropic-version'] = '2023-06-01';
+    }
+
+    const resp = await fetch(endpoint, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-6',
+        max_tokens: 1000,
+        system,
+        messages: [{ role: 'user', content: userMsg }]
+      })
+    });
+    clearInterval(stepInterval);
+    const data = await resp.json();
+
+    if (!resp.ok) {
+      clearInterval(stepInterval);
+      showHome();
+      showToast('API error: ' + (data.error?.message || 'Unknown error'));
+      return;
+    }
+
+    const raw = data.content.map(b => b.text || '').join('').replace(/```json|```/g, '').trim();
+    const parsed = JSON.parse(raw);
+    currentResults = { product, source: activeSource, data: parsed, time: new Date() };
+    addToHistory(currentResults);
+    showResults(currentResults);
+  } catch(e) {
+    clearInterval(stepInterval);
+    showHome();
+    console.error(e);
+    showToast('Analysis failed — check console or run via local server');
+  }
+}
+
+function showLoading(product) {
+  document.getElementById('main-content').innerHTML = `
+    <div class="loading-state fade-up">
+      <div class="loading-ring"></div>
+      <div class="loading-title">Analyzing ${product}</div>
+      <div class="loading-sub">via ${sourceLabels[activeSource]}</div>
+      <div class="loading-steps">
+        <div class="loading-step"><div class="step-dot active"></div>Scanning data source</div>
+        <div class="loading-step"><div class="step-dot"></div>Clustering complaint themes</div>
+        <div class="loading-step"><div class="step-dot"></div>Classifying signals</div>
+        <div class="loading-step"><div class="step-dot"></div>Generating product ideas</div>
+      </div>
+    </div>`;
+}
+
+function showResults(r) {
+  const { product, source, data, time } = r;
+  const maxCount = Math.max(...data.themes.map(t => t.count));
+  document.getElementById('export-icon-btn').style.display = 'flex';
+  document.getElementById('topbar-title').textContent = product;
+
+  const tagClass = { opportunity: 'tag-opp', risk: 'tag-risk', gap: 'tag-gap' };
+
+  document.getElementById('main-content').innerHTML = `
+    <div class="results-page fade-up">
+      <div class="results-header">
+        <div class="results-product">${product}</div>
+        <div class="results-meta">
+          <span class="results-badge">${sourceLabels[source]}</span>
+          <span class="results-time">${time.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})}</span>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-heading">Complaint themes</div>
+        <div class="theme-row">
+          ${data.themes.map(t => `
+            <div class="theme-card">
+              <div class="theme-label" style="color:${barColors[t.color]||'#888'}">${t.name}</div>
+              <div class="theme-bar-bg"><div class="theme-bar" style="width:${Math.round(t.count/maxCount*100)}%;background:${barColors[t.color]||'#888'}"></div></div>
+              <div class="theme-count">${t.count} mentions</div>
+            </div>`).join('')}
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-heading">Extracted signals</div>
+        <div class="signal-list">
+          ${data.signals.map(s => `
+            <div class="signal-row">
+              <div class="signal-dot" style="background:${s.type==='opportunity'?'var(--teal)':s.type==='risk'?'var(--coral)':'var(--purple)'}"></div>
+              <div class="signal-text">${s.text}</div>
+              <span class="signal-tag ${tagClass[s.type]||''}">${s.type}</span>
+            </div>`).join('')}
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-heading">Product ideas</div>
+        <div class="idea-grid">
+          ${data.ideas.map((idea, i) => `
+            <div class="idea-card" onclick="deepDive('${idea.title.replace(/'/g,"\\'")}', '${product}')">
+              <div class="idea-num">0${i+1}</div>
+              <div class="idea-title">${idea.title}</div>
+              <div class="idea-desc">${idea.desc}</div>
+              <div class="idea-cta">→ Write one-pager</div>
+            </div>`).join('')}
+        </div>
+      </div>
+
+      <div class="export-row">
+        <button class="export-btn" onclick="exportResults()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Export JSON
+        </button>
+        <button class="export-btn" onclick="copyMarkdown()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+          Copy as Markdown
+        </button>
+        <button class="export-btn" onclick="newAnalysis()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          New Analysis
+        </button>
+      </div>
+    </div>`;
+}
+
+function deepDive(ideaTitle, product) {
+  const msg = `For ${product}, write a detailed product one-pager for this idea: "${ideaTitle}". Include: problem statement, proposed solution, key features, success metrics, and implementation considerations.`;
+  if (window.parent && window.parent !== window) {
+    window.parent.postMessage({ type: 'sendPrompt', text: msg }, '*');
+  } else {
+    showToast('Copy idea: ' + ideaTitle);
+  }
+}
+
+function addToHistory(r) {
+  history.unshift(r);
+  if (history.length > 10) history.pop();
+  const list = document.getElementById('history-list');
+  list.innerHTML = history.map((item, i) => `
+    <div class="history-item" onclick="showResults(history[${i}])">
+      <div class="h-name">${item.product}</div>
+      <div class="h-meta">${sourceLabels[item.source]} · ${item.time.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})}</div>
+    </div>`).join('');
+}
+
+function exportResults() {
+  if (!currentResults) return;
+  const blob = new Blob([JSON.stringify(currentResults.data, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `signal-${currentResults.product.toLowerCase().replace(/\s+/g,'-')}.json`;
+  a.click();
+  showToast('JSON exported');
+}
+
+function copyMarkdown() {
+  if (!currentResults) return;
+  const { product, source, data } = currentResults;
+  let md = `# Signal Analysis: ${product}\nSource: ${sourceLabels[source]}\n\n## Complaint Themes\n`;
+  data.themes.forEach(t => { md += `- **${t.name}** (${t.count} mentions)\n`; });
+  md += `\n## Signals\n`;
+  data.signals.forEach(s => { md += `- [${s.type.toUpperCase()}] ${s.text}\n`; });
+  md += `\n## Product Ideas\n`;
+  data.ideas.forEach((idea, i) => { md += `### ${i+1}. ${idea.title}\n${idea.desc}\n\n`; });
+  navigator.clipboard.writeText(md).then(() => showToast('Markdown copied to clipboard'));
+}
+
+function newAnalysis() {
+  showHome();
+}
+
+function showToast(msg) {
+  const toast = document.getElementById('toast');
+  document.getElementById('toast-text').textContent = msg;
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), 2800);
+}
+
+// Init
+initApiKey();
+showHome();
+</script>
+</body>
+</html>
